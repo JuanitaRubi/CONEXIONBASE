@@ -1,0 +1,120 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model staff {
+	staff_id          Int       @id @default(autoincrement())
+	rfc_staff         String
+	first_name        String
+	last_name         String
+	paternal_surname  String
+	maternal_surname  String
+	street            String
+	number_street     String
+	city              String
+	state             String
+	zip_code          String
+	phone             String
+	email             String
+	active            Boolean
+	income_date       DateTime
+	store_id          Int
+	sale              sale[]
+	store             store  @relation(fields: [store_id], references: [store_id])
+}
+
+model sale {
+	sale_id     Int       @id @default(autoincrement())
+	sale_status String
+	sale_date   DateTime
+	subtotal    Float
+	tax         Float
+	total       Float
+	staff_id    Int
+	store_id    Int
+	customer_id Int
+	sale_item   sale_item[]
+	staff       staff   @relation(fields: [staff_id], references: [staff_id])
+	store       store   @relation(fields: [store_id], references: [store_id])
+	customer    customer @relation(fields: [customer_id], references: [customer_id])
+}
+
+model sale_item {
+	sale_id     Int      @id
+	product_id  Int
+	quantity    Int
+	list_price  Float
+	discount    Float
+	sale        sale     @relation(fields: [sale_id], references: [sale_id])
+	product     product  @relation(fields: [product_id], references: [product_id])
+	
+	@@id([sale_id, product_id])
+}
+
+model customer {
+	customer_id        Int       @id @default(autoincrement())
+	first_name         String
+	last_name          String
+	paternal_surname   String
+	maternal_surname   String
+	rfc_customer       String
+	street             String
+	number_street      String
+	city               String
+	state              String
+	zip_code           String
+	email              String
+	phone              String
+	sale               sale[]
+}
+
+model store {
+	store_id       Int       @id @default(autoincrement())
+	store_name     String
+	rfc_store      String
+	phone          String
+	email          String
+	street         String
+	number_street  String
+	city           String
+	state          String
+	zip_code       String
+	staff          staff[]
+	sale           sale[]
+	stock          stock[]
+}
+
+model stock {
+  store_id       Int      @id
+  product_id     Int
+  quantity       Int
+  product        product @relation(fields: [product_id], references: [product_id])
+  store          store   @relation(fields: [store_id], references: [store_id])
+
+  @@id([store_id, product_id])
+}
+
+model product {
+  product_id           Int       @id @default(autoincrement())
+  product_name         String
+  product_description  String
+  brand_id             Int
+  category_id          Int
+  model_year           Int
+  list_price           Float
+  brand                brand    @relation(fields: [brand_id], references: [brand_id])
+  category             category @relation(fields: [category_id], references: [category_id])
+}
+
+model brand {
+  brand_id    Int      @id @default(autoincrement())
+  brand_name  String
+  product     product[]
+}
+
+model category {
+  category_id     Int       @id @default(autoincrement())
+  category_name   String
+  product         product[]
+}
